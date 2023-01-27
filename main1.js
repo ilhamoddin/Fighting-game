@@ -5,7 +5,7 @@ cnv.height = 900;
 
 
 class Player {
-    constructor(position, image, numframe, size) {
+    constructor(position, image, numframe, size, naturaly) {
         this.position = position;
         this.grav = 0.3;
         this.speedy = 0;
@@ -14,7 +14,7 @@ class Player {
         this.image.src = image;
         this.idle = new Image();
         this.idle.src = image;
-        this.scalex = 200;
+        this.scalex = 150;
         this.num_frames = numframe;
         this.frame_rate = 20;
         this.frame_timer = 0;
@@ -22,7 +22,9 @@ class Player {
         this.attack_timer = 0;
         this.speedy = 0;
         this.speedx = 0;
+        this.naturaly = naturaly;
         this.size = size;
+        this.health = 800
         this.rect = { x: this.position.x, y: this.position.y, width: this.scalex, height: this.scalex };
     }
 
@@ -65,11 +67,11 @@ class Player {
     }
 
     gravity() {
-        if (this.position.y < 600) {
+        if (this.position.y < this.naturaly) {
             this.speedy += this.grav;
             this.position.y += this.speed;
         } else {
-            this.position.y = 600;
+            this.position.y = this.naturaly;
         }
     }
 
@@ -93,8 +95,11 @@ class Player {
 //Initialize players
 
 
-let player1 = new Player({ x: 50, y: 600 }, 'king/Idle.png', 5, 155);
-let player2 = new Player({ x: 1300, y: 600 }, 'warrior/Idle.png', 9, 162);
+let player1 = new Player({ x: 50, y: 600 }, 'king/Idle.png', 5, 155, 715);
+let player2 = new Player({ x: 1300, y: 600 }, 'warrior/Idle.png', 9, 162, 670);
+
+player2.scalex = 250
+
 
 let isjump1 = false;
 let isright1 = false;
@@ -213,7 +218,7 @@ document.addEventListener('keyup', function (event) {
 
 
 
-function movement2(){
+function movement2() {
     if (isright2) {
         player2.right()
     }
@@ -226,7 +231,7 @@ function movement2(){
     if (isattack2) {
         player2.attack()
     }
-    if (isleft2 == false && isright2 == false){
+    if (isleft2 == false && isright2 == false) {
         player2.speedx = 0
     }
     if (isjump2 == false) {
@@ -248,7 +253,7 @@ function movement1() {
     if (isattack1) {
         player1.attack()
     }
-    if (isleft1 == false && isright1 == false){
+    if (isleft1 == false && isright1 == false) {
         player1.speedx = 0
     }
     if (isjump1 == false) {
@@ -256,7 +261,64 @@ function movement1() {
     }
 }
 
-let counter = 150;
+function reset_game() {
+    player1.position.x = 50
+    player1.position.y = 600
+    player2.position.x = 1300
+    player2.position.y = 600
+    player1.health = 800
+    player2.health = 800
+}
+
+function health_checker() {
+    if (player1.health <= 0) {
+        alert("player2 wins")
+        reset_game()
+    }
+    if (player2.health <= 0) {
+        alert("player1 wins")
+        reset_game()
+    }
+}
+
+function attack_checker() {
+    if (isattack1 = true) {
+        if (player1.position.x + 400 >= player2.position.x) {
+            player2.health -= 800;
+            console.log('go')
+        }
+    }
+    if (isattack2 = true) {
+        if (player2.position.x - 200 <= player1.position.x) {
+            player1.health -= 80
+            console.log('go')
+        }
+    }
+}
+
+function collision() {
+    if (player1.position.x >= player2.position.x || player2.position.x <= player1.position.x) {
+        if (player1.speedx > 0) {
+            player1.speedx = 0
+        }
+        if (player2.speedx < 0) {
+            player2.speedx = 0
+        }
+    }
+    if (player1.position.x <= -50) {
+        player1.position.x = -50
+    }
+    if (player2.position.x >= 1450) {
+        player2.position.x = 1450;
+    }
+}
+
+function health_bar() {
+    ctx.fillstyle = 'red'
+    ctx.fillRect(0, 0, player1.health, 30)
+    ctx.fillstyle = 'blue'
+    ctx.fillRect(player2.health, 0, 1600, 30)
+}
 
 let BackgroundImage = new Image();
 BackgroundImage.src = "Back.png";
@@ -269,8 +331,10 @@ function loop() {
     // player2.checkCollision(player1);
     movement1()
     movement2()
-    counter++;
-    console.log(counter)
+    collision()
+    health_checker()
+    attack_checker()
+    health_bar()
     requestAnimationFrame(loop)
 }
 
